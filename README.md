@@ -1,4 +1,11 @@
-<a href="https://pratyushshivam.github.io/doodle-drive/"><img src="assets/hero.gif" width="100%" alt="Doodle Drive: a hand draws a red car with two wheels, a blue window and a yellow flag on a sheet of paper. Go is pressed, the paper flies away, and the drawing drives over green hills to a chequered flag."></a>
+<a href="https://pratyushshivam.github.io/doodle-drive/"><img src="assets/banner.png" width="100%" alt="Doodle Drive. Draw anything. Press Go. Physics does the rest. Four hand-drawn machines roll over a green hill under a red sun: a red car, a green tractor, a yellow banana on wheels and a red box on square wheels."></a>
+
+<p align="center">
+  <a href="https://pratyushshivam.github.io/doodle-drive/"><img alt="Play in your browser" src="https://img.shields.io/badge/play-in%20your%20browser-ff4b33?style=for-the-badge&labelColor=17150f"></a>
+  <a href="https://github.com/pratyushshivam/doodle-drive/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/pratyushshivam/doodle-drive/ci.yml?branch=main&style=for-the-badge&label=tests&labelColor=17150f&color=17b884"></a>
+  <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-ffc928?style=for-the-badge&labelColor=17150f"></a>
+  <img alt="No install, no account, no tracking" src="https://img.shields.io/badge/no%20install-no%20account-3b82ff?style=for-the-badge&labelColor=17150f">
+</p>
 
 <p align="center">
   <a href="https://pratyushshivam.github.io/doodle-drive/"><b>Play it</b></a> ·
@@ -17,6 +24,10 @@ There is a sheet of paper and a big red button. Whatever you draw on the paper b
 Good drawings get there. Bad drawings are funnier. Square wheels work, slowly. A tall tower falls on its face. A brick with no wheels sits there and thinks about it. When it goes wrong you draw another one in five seconds.
 
 **Play:** [pratyushshivam.github.io/doodle-drive](https://pratyushshivam.github.io/doodle-drive/)
+
+<a href="https://pratyushshivam.github.io/doodle-drive/"><img src="assets/hero.gif" width="100%" alt="A recording of one go: a red car with two wheels, a blue window and a yellow flag is drawn on a sheet of paper taped to the sky. Go is pressed, the paper flies away, and the drawing drives over green hills past trees and a 20 metre sign to a chequered flag, confetti and three stars."></a>
+
+<p align="center"><sub>One whole go, recorded from the running game. The drawing part is sped up.</sub></p>
 
 No install, no account, no loading screen. It works with a mouse, a finger or a keyboard.
 

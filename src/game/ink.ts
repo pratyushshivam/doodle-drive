@@ -68,8 +68,10 @@ export function drawPart(ctx: CanvasRenderingContext2D, look: PartLook, path: Pa
   ctx.lineCap = "round";
   if (pass === 0) {
     ctx.strokeStyle = PAPER;
-    ctx.lineWidth = look.kind === "stick" ? 0.34 : look.kind === "deco" ? 0 : 0.24;
-    if (ctx.lineWidth > 0) ctx.stroke(path);
+    // A window has no sticker edge of its own.
+    if (look.kind === "deco") return;
+    ctx.lineWidth = look.kind === "stick" ? 0.34 : 0.24;
+    ctx.stroke(path);
     return;
   }
   if (look.kind === "stick") {

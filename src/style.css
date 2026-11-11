@@ -400,6 +400,32 @@ svg {
   }
 }
 
+/* Two strips of tape hold the paper to the sky. */
+.sheet::before,
+.sheet::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: -15px;
+  width: 104px;
+  height: 30px;
+  background: rgba(255, 201, 40, 0.92);
+  border: 2.5px solid var(--ink);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.sheet::before {
+  left: 9%;
+  transform: rotate(-5deg);
+}
+
+.sheet::after {
+  right: 16%;
+  transform: rotate(3.5deg);
+  background: rgba(255, 122, 192, 0.92);
+}
+
 .sheet.is-nope {
   animation: nope 0.4s linear;
 }

@@ -3,7 +3,7 @@
 import type { Body } from "planck";
 import { type Course, groundAt } from "../engine/courses";
 import type { Sim, SimPart } from "../engine/sim";
-import { COLORS, INK, PAPER, type PartLook, type PartPaths, drawPart, mix, partPaths, rng } from "./ink";
+import { COLORS, FONT, INK, PAPER, type PartLook, type PartPaths, drawPart, mix, partPaths, rng } from "./ink";
 
 interface Scene {
   fills: Path2D[];
@@ -14,6 +14,10 @@ interface Scene {
   clouds: { x: number; y: number; s: number; v: number }[];
   stars: { x: number; y: number; r: number }[];
   finishY: number;
+  /** Trees, bushes and rocks standing along the course. */
+  scenery: { x: number; y: number; kind: number; s: number; tilt: number }[];
+  /** A signpost every 20 metres. */
+  signs: { x: number; y: number; n: number }[];
 }
 
 interface Particle {
@@ -131,7 +135,21 @@ export class WorldView {
     }));
     const clouds = Array.from({ length: 7 }, () => ({ x: r(), y: 0.06 + r() * 0.3, s: 0.6 + r() * 0.9, v: 0.004 + r() * 0.006 }));
     const stars = Array.from({ length: 70 }, () => ({ x: r(), y: r() * 0.75, r: 0.6 + r() * 1.8 }));
-    this.scene = { fills, lines, tufts, specks, hills, clouds, stars, finishY: groundAt(c, c.finishX) ?? 0 };
+    const scenery: Scene["scenery"] = [];
+    for (let x = -7; x < c.finishX + 26; x += 3.5 + r() * 6) {
+      const y = groundAt(c, x);
+      const y2 = groundAt(c, x + 0.5);
+      const y0 = groundAt(c, x - 0.5);
+      if (y === null || y2 === null || y0 === null) continue;
+      if (Math.abs(y2 - y0) > 0.5 || Math.abs(x - c.finishX) < 2.5 || Math.abs(x) < 1.5) continue;
+      scenery.push({ x, y, kind: Math.floor(r() * 3), s: 0.75 + r() * 0.7, tilt: (r() - 0.5) * 0.16 });
+    }
+    const signs: Scene["signs"] = [];
+    for (let n = 20; n < c.finishX - 6; n += 20) {
+      const y = groundAt(c, n);
+      if (y !== null && groundAt(c, n - 0.6) !== null && groundAt(c, n + 0.6) !== null) signs.push({ x: n, y, n });
+    }
+    this.scene = { fills, lines, tufts, specks, hills, clouds, stars, finishY: groundAt(c, c.finishX) ?? 0, scenery, signs };
     this.particles = [];
     this.confetti = [];
   }
@@ -227,6 +245,19 @@ export class WorldView {
     ctx.beginPath();
     ctx.arc(sunX, sunY, sunR, 0, Math.PI * 2);
     ctx.stroke();
+    if (!th.night) {
+      // Rays that turn slowly, drawn like pen ticks.
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      for (let i = 0; i < 14; i++) {
+        const a = (i / 14) * Math.PI * 2 + this.time * 0.12;
+        const r1 = sunR * (1.16 + (i % 2) * 0.05);
+        const r2 = sunR * (1.3 + (i % 2) * 0.14);
+        ctx.moveTo(sunX + Math.cos(a) * r1, sunY + Math.sin(a) * r1);
+        ctx.lineTo(sunX + Math.cos(a) * r2, sunY + Math.sin(a) * r2);
+      }
+      ctx.stroke();
+    }
 
     // Two rows of far hills.
     sc.hills.forEach((hl, i) => {
@@ -258,9 +289,22 @@ export class WorldView {
         ctx.ellipse(px + dx - 24 * s, py + dy - 14 * s, 30 * s, 22 * s, 0, 0, Math.PI * 2);
         ctx.ellipse(px + dx + 20 * s, py + dy - 20 * s, 36 * s, 28 * s, 0, 0, Math.PI * 2);
       };
-      ctx.fillStyle = th.night ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.86)";
-      blob(0, 0);
-      ctx.fill();
+      if (th.night) {
+        ctx.fillStyle = "rgba(255,255,255,0.14)";
+        blob(0, 0);
+        ctx.fill();
+      } else {
+        // Shadow off register, then an ink edge around the whole cloud, then the white.
+        ctx.fillStyle = mix(th.sky, th.far, 0.9);
+        blob(5, 6);
+        ctx.fill();
+        ctx.strokeStyle = line;
+        ctx.lineWidth = 5.5;
+        blob(0, 0);
+        ctx.stroke();
+        ctx.fillStyle = "#fffdf6";
+        ctx.fill();
+      }
     }
 
     // The world, in metres.
@@ -285,11 +329,19 @@ export class WorldView {
       }
     }
 
+    this.drawScenery(line, left, right);
+
     sc.fills.forEach((fill, i) => {
       ctx.fillStyle = th.ground;
       ctx.fill(fill);
       ctx.save();
       ctx.clip(fill);
+      ctx.strokeStyle = "rgba(23,21,15,0.08)";
+      ctx.lineWidth = 3.6;
+      ctx.stroke(sc.lines[i][0]);
+      ctx.strokeStyle = th.ground;
+      ctx.lineWidth = 2.3;
+      ctx.stroke(sc.lines[i][0]);
       ctx.strokeStyle = "rgba(255,255,255,0.3)";
       ctx.lineWidth = 0.9;
       ctx.stroke(sc.lines[i][0]);
@@ -370,6 +422,118 @@ export class WorldView {
         ctx.fillRect(-f.w / 2, -f.w / 4, f.w, f.w / 2);
         ctx.restore();
       }
+    }
+  }
+
+  /** Trees, bushes, rocks and distance signs. They stand behind the ground line. */
+  private drawScenery(line: string, left: number, right: number) {
+    const { ctx } = this;
+    const th = this.course.theme;
+    const bare = !!th.night || this.course.friction < 0.2;
+    const leaf = th.night ? "#b9b2ea" : mix(th.ground, "#17150f", 0.1);
+    const light = "rgba(255,255,255,0.35)";
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    for (const it of this.scene.scenery) {
+      if (it.x < left - 3 || it.x > right + 3) continue;
+      const sway = Math.sin(this.time * 1.3 + it.x) * 0.025;
+      ctx.save();
+      ctx.translate(it.x, it.y + 0.12);
+      ctx.scale(it.s, it.s);
+      ctx.rotate(it.tilt + sway);
+      ctx.strokeStyle = line;
+      ctx.fillStyle = leaf;
+      if (bare && it.kind !== 1) {
+        // A rock.
+        ctx.lineWidth = 0.08;
+        ctx.beginPath();
+        ctx.moveTo(-0.6, 0);
+        ctx.lineTo(-0.42, -0.5);
+        ctx.lineTo(0.1, -0.72);
+        ctx.lineTo(0.55, -0.38);
+        ctx.lineTo(0.68, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else if (it.kind === 0) {
+        // A lollipop tree.
+        ctx.lineWidth = 0.13;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -1.9);
+        ctx.stroke();
+        ctx.lineWidth = 0.08;
+        ctx.beginPath();
+        ctx.arc(0, -2.3, 0.85, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = light;
+        ctx.lineWidth = 0.14;
+        ctx.beginPath();
+        ctx.arc(0, -2.3, 0.55, Math.PI * 1.05, Math.PI * 1.55);
+        ctx.stroke();
+      } else if (it.kind === 1) {
+        // A pine.
+        ctx.lineWidth = 0.13;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -0.7);
+        ctx.stroke();
+        ctx.lineWidth = 0.08;
+        ctx.beginPath();
+        ctx.moveTo(-0.75, -0.6);
+        ctx.lineTo(0, -2.9);
+        ctx.lineTo(0.75, -0.6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = light;
+        ctx.lineWidth = 0.12;
+        ctx.beginPath();
+        ctx.moveTo(-0.32, -1.0);
+        ctx.lineTo(0, -2.1);
+        ctx.stroke();
+      } else {
+        // A bush: three humps under one outline.
+        const humps = () => {
+          ctx.beginPath();
+          ctx.arc(-0.42, -0.3, 0.42, 0, Math.PI * 2);
+          ctx.moveTo(0.66, -0.5);
+          ctx.arc(0.1, -0.5, 0.56, 0, Math.PI * 2);
+          ctx.moveTo(0.98, -0.28);
+          ctx.arc(0.58, -0.28, 0.4, 0, Math.PI * 2);
+        };
+        ctx.lineWidth = 0.16;
+        humps();
+        ctx.stroke();
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+    for (const sg of this.scene.signs) {
+      if (sg.x < left - 3 || sg.x > right + 3) continue;
+      ctx.save();
+      ctx.translate(sg.x, sg.y + 0.1);
+      ctx.rotate(-0.04);
+      ctx.strokeStyle = line;
+      ctx.lineWidth = 0.1;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, -1.5);
+      ctx.stroke();
+      ctx.fillStyle = PAPER;
+      ctx.lineWidth = 0.07;
+      ctx.beginPath();
+      ctx.roundRect(-0.62, -2.05, 1.24, 0.72, 0.12);
+      ctx.fill();
+      ctx.stroke();
+      ctx.scale(0.01, 0.01);
+      ctx.fillStyle = INK;
+      ctx.font = `800 44px ${FONT}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(`${sg.n} m`, 0, -167);
+      ctx.restore();
     }
   }
 
