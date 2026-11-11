@@ -145,7 +145,7 @@ class Builder {
   done(): { ground: Pt[][]; props: Prop[]; finishX: number; killY: number } {
     this.flat(3);
     const finishX = this.x;
-    this.flat(12);
+    this.flat(30);
     this.cur.push({ x: this.x, y: this.y - 14 });
     this.pieces.push(this.cur);
     return { ground: this.pieces, props: this.props, finishX, killY: this.maxY + 7 };

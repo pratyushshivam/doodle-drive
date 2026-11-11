@@ -64,6 +64,8 @@ export interface Doodle {
   wheels: number;
   /** How much the drawing was scaled to reach a drivable size. */
   scale: number;
+  /** Where the machine's origin sat in the drawing: drawn = point / scale + origin. */
+  origin: Pt;
 }
 
 /** A finished machine is never smaller or larger than this, in metres. */
@@ -181,7 +183,7 @@ function inside(a: Raw, b: Raw): boolean {
 }
 
 export function emptyDoodle(): Doodle {
-  return { parts: [], groups: 0, box: { minX: 0, minY: 0, maxX: 0, maxY: 0 }, wheels: 0, scale: 1 };
+  return { parts: [], groups: 0, box: { minX: 0, minY: 0, maxX: 0, maxY: 0 }, wheels: 0, scale: 1, origin: { x: 0, y: 0 } };
 }
 
 /**
@@ -314,6 +316,7 @@ export function buildDoodle(strokes: Stroke[], normalise = true): Doodle {
     box: bbox(ok.flatMap((p) => p.outline)),
     wheels: ok.filter((p) => p.kind === "wheel").length,
     scale,
+    origin: { x: ox, y: oy },
   };
 }
 

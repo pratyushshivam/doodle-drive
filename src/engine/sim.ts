@@ -278,7 +278,7 @@ export class Sim {
         const ease = (1 - rear) * (airborne ? 0.2 : 1);
         p.joint.enableMotor(drive !== 0 || this.finished);
         p.joint.setMotorSpeed(drive * p.speed);
-        p.joint.setMaxMotorTorque(this.finished ? p.torque * 0.4 : p.torque * ease);
+        p.joint.setMaxMotorTorque(this.finished ? p.torque * 1.2 : p.torque * ease);
       } else if (drive !== 0) {
         // A wheel with no body to push against is spun directly.
         if (Math.abs(p.body.getAngularVelocity()) < p.speed) p.body.applyTorque(drive * p.torque * 0.5, true);
