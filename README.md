@@ -49,7 +49,7 @@ No install, no account, no loading screen. It works with a mouse, a finger or a 
 | **Courses** | Ten, from a gentle lane to ice, low gravity and a bit of everything |
 | **Controls** | Draw with a finger or mouse. Hold anywhere to go. The left edge is reverse |
 | **Sharing** | A picture of your doodle with its time, made in the browser. Nothing is uploaded |
-| **Stack** | TypeScript, one 2D canvas, [planck.js](https://github.com/piqnt/planck.js) for the physics, WebAudio for every sound. 66 kB of script, gzipped |
+| **Stack** | TypeScript, one 2D canvas, [planck.js](https://github.com/piqnt/planck.js) for the physics, WebAudio for every sound. 67 kB of script, gzipped |
 
 ## How to play
 
