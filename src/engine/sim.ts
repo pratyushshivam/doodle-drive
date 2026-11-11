@@ -104,7 +104,7 @@ export class Sim {
     const filter = { filterCategoryBits: PROP, filterMaskBits: GROUND | BODY | WHEEL | PROP };
     if (p.type === "crate") {
       const b = this.world.createBody({ type: "dynamic", position: Vec2(p.x, p.y) });
-      b.createFixture({ shape: new Box(p.s / 2, p.s / 2), density: 0.12, friction: 0.4, restitution: 0.1, ...filter });
+      b.createFixture({ shape: new Box(p.s / 2, p.s / 2), density: 0.08, friction: 0.35, restitution: 0.1, ...filter });
       this.props.push({ kind: "crate", body: b, w: p.s, h: p.s });
       return;
     }
@@ -290,7 +290,7 @@ export class Sim {
         const g1 = groundAt(this.course, hx - 1.2);
         const g2 = groundAt(this.course, hx + 1.2);
         const hill = g1 !== null && g2 !== null ? Math.atan2(g2 - g1, 2.4) : 0;
-        const rear = Math.max(0, Math.min(1, (-(a - hill) * drive - 0.16) / 0.4));
+        const rear = Math.max(0, Math.min(0.72, (-(a - hill) * drive - 0.16) / 0.4));
         const ease = (1 - rear) * (airborne ? 0.2 : 1);
         p.joint.enableMotor(drive !== 0 || this.finished);
         p.joint.setMotorSpeed(drive * p.speed);

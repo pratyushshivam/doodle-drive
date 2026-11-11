@@ -133,7 +133,7 @@ class Builder {
     return this.ramp(0.9, 0.3);
   }
 
-  crates(cols: number, rows = 2, s = 0.5) {
+  crates(cols: number, rows = 2, s = 0.44) {
     for (let c = 0; c < cols; c++) {
       for (let r = 0; r < rows - (c % 2); r++) {
         this.props.push({ type: "crate", x: this.x + 0.6 + c * (s + 0.06), y: this.y - s / 2 - r * s, s });
@@ -235,7 +235,7 @@ export const COURSES: Course[] = [
     { sky: "#ffb991", far: "#ff9968", ground: "#22b8a0", sun: "#fff6cf" },
     [11.5, 18],
     (b) =>
-      b.bumps(10, 1.6, 0.28).flat(3).crates(4).flat(2).bumps(6, 2.6, 0.4).flat(2).crates(5).bumps(8, 1.3, 0.22),
+      b.bumps(10, 1.8, 0.22).flat(3).crates(5).flat(8).bumps(6, 3, 0.4).flat(2).bumps(8, 1.6, 0.18),
   ),
   course(
     "wobbly-bridge",
