@@ -51,7 +51,8 @@ export class Pad {
   }
 
   private get baseY() {
-    return this.h * 0.86;
+    // On a tall pad the ground line moves up, so the drawing sits in the middle.
+    return Math.min(this.h * 0.86, this.h / 2 + 2.1 * this.ppm);
   }
 
   private toPad(e: PointerEvent): Pt {

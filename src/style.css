@@ -1207,7 +1207,7 @@ body[data-state="drive"] .pedal.is-down {
   .draw {
     flex-direction: row;
     align-items: stretch;
-    padding: calc(var(--pad) + var(--safe-t)) calc(var(--pad) + 190px) calc(var(--pad) + var(--safe-b) + 4px) calc(var(--pad) + 120px);
+    padding: calc(var(--pad) + var(--safe-t)) calc(var(--pad) + 286px) calc(var(--pad) + var(--safe-b) + 4px) calc(var(--pad) + 116px);
   }
   .sheet {
     width: auto;
@@ -1217,7 +1217,7 @@ body[data-state="drive"] .pedal.is-down {
     position: fixed;
     right: var(--pad);
     bottom: calc(var(--pad) + var(--safe-b) + 4px);
-    width: 176px;
+    width: 270px;
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
@@ -1234,8 +1234,8 @@ body[data-state="drive"] .pedal.is-down {
     gap: 6px;
   }
   .starter {
-    width: 53px;
-    height: 42px;
+    width: 50px;
+    height: 46px;
   }
   .go {
     width: 100%;
@@ -1247,12 +1247,22 @@ body[data-state="drive"] .pedal.is-down {
     width: min(100%, 640px);
     padding: 16px 20px;
   }
+  .result-course {
+    display: none;
+  }
   .result h2 {
-    font-size: 36px;
+    font-size: 32px;
+    text-shadow: 2px 2px 0 var(--ink);
   }
   .result-big {
-    font-size: 58px;
-    margin-top: 6px;
+    font-size: 54px;
+    margin-top: 12px;
+  }
+  .go.small {
+    height: 48px;
+  }
+  .result-actions .pill {
+    height: 44px;
   }
   .stars {
     height: 40px;
