@@ -158,6 +158,28 @@ export const ODDITIES: Starter[] = [
     ],
   },
   {
+    // What most people draw first: a low car on small wheels.
+    id: "small-car",
+    name: "Small car",
+    strokes: [
+      ring(
+        [
+          [-2.2, -0.45],
+          [-2.25, -1.15],
+          [-1.1, -1.25],
+          [-0.6, -1.95],
+          [0.8, -2.0],
+          [1.3, -1.25],
+          [2.2, -1.1],
+          [2.2, -0.45],
+        ],
+        0,
+      ),
+      circle(-1.3, -0.4, 0.4, 0, 0.08),
+      circle(1.35, -0.4, 0.4, 0, 0.08),
+    ],
+  },
+  {
     id: "tower",
     name: "Tower",
     strokes: [

@@ -25,12 +25,12 @@ it.skipIf(!want)("trace", () => {
   let n = 0;
   while (sim.t < 40 && !sim.finished && !sim.fell) {
     sim.step(1);
-    if (n++ % 30 === 0) {
+    if (n++ % Number(process.env.EVERY ?? 30) === 0) {
       const b = sim.lead!;
       const p = b.getPosition();
       const v = b.getLinearVelocity();
       out.push(
-        `t${sim.t.toFixed(1)} x${p.x.toFixed(1)} y${p.y.toFixed(1)} vx${v.x.toFixed(1)} vy${v.y.toFixed(1)} a${((b.getAngle() * 180) / Math.PI).toFixed(0)}`,
+        `t${sim.t.toFixed(1)} x${p.x.toFixed(1)} y${p.y.toFixed(1)} vx${v.x.toFixed(1)} vy${v.y.toFixed(1)} a${((b.getAngle() * 180) / Math.PI).toFixed(0)} ${sim.parts.filter((q) => q.part.kind === "wheel").map((q) => `w(${q.body.getPosition().x.toFixed(2)},${q.body.getPosition().y.toFixed(2)} ${q.grounded ? "g" : "-"})`).join("")}`,
       );
     }
   }
@@ -40,7 +40,7 @@ it.skipIf(!want)("trace", () => {
 
 it.skipIf(!process.env.TIMES)("times", () => {
   const rows = COURSES.map((c, i) => {
-    const t = [...STARTERS, ODDITIES[0]].map((s) => {
+    const t = [...STARTERS, ...ODDITIES.slice(0, 2)].map((s) => {
       const sim = new Sim(COURSES[i], buildDoodle(s.strokes));
       while (sim.t < 60 && !sim.finished && !sim.fell) sim.step(1);
       return sim.finished ? sim.finishT.toFixed(1) : "--";

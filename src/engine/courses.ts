@@ -181,24 +181,24 @@ export const COURSES: Course[] = [
     "Hiccup Hills",
     "Up, down, up, down, up.",
     { sky: "#a8e0ff", far: "#74c6f7", ground: "#ff8a3c", sun: "#fff6cf" },
-    [13, 19],
+    [11.5, 17],
     (b) =>
-      b.bumps(3, 5, 0.9).slope(12, 2.4).flat(3).slope(10, -3).hill(12, 1.4).flat(3).bumps(4, 3.5, 0.6),
+      b.bumps(3, 6.5, 0.8).slope(12, 2.4).flat(3).slope(10, -3).hill(12, 1.4).flat(3).bumps(4, 3.5, 0.6),
   ),
   course(
     "the-staircase",
     "The Staircase",
     "Small wheels will regret this.",
     { sky: "#ffc7d6", far: "#ff9fba", ground: "#7a5cff", sun: "#fffbe8" },
-    [11.5, 17],
+    [10, 15],
     (b) =>
       b
-        .steps(6, 1.7, 0.26)
+        .steps(6, 1.7, 0.22)
         .flat(4)
         .steps(5, 1.5, -0.4)
         .flat(3)
         .hill(8, 1.1)
-        .steps(4, 1.4, 0.32)
+        .steps(4, 1.5, 0.24)
         .flat(3)
         .slope(10, -1.3),
   ),
@@ -233,7 +233,7 @@ export const COURSES: Course[] = [
     "Washboard",
     "Hold on to your wheels.",
     { sky: "#ffb991", far: "#ff9968", ground: "#22b8a0", sun: "#fff6cf" },
-    [13, 20],
+    [11.5, 18],
     (b) =>
       b.bumps(10, 1.6, 0.28).flat(3).crates(4).flat(2).bumps(6, 2.6, 0.4).flat(2).crates(5).bumps(8, 1.3, 0.22),
   ),
@@ -261,7 +261,7 @@ export const COURSES: Course[] = [
     "Moon Bounce",
     "Low gravity. Long, slow jumps.",
     { sky: "#2b2470", far: "#3d3596", ground: "#d9d4f5", sun: "#5ad1ff", night: true },
-    [16.5, 25],
+    [15, 23],
     (b) =>
       b
         .hill(10, 1.4)
@@ -273,7 +273,7 @@ export const COURSES: Course[] = [
         .slope(8, -1.2)
         .gap(3.4, 1.3)
         .flat(5)
-        .steps(4, 2, 0.35),
+        .bumps(3, 5, 0.6),
     2.4,
   ),
   course(
@@ -281,11 +281,11 @@ export const COURSES: Course[] = [
     "The Big One",
     "A bit of everything.",
     { sky: "#ff7a59", far: "#ffa07d", ground: "#2447ff", sun: "#ffe14d" },
-    [17.5, 27],
+    [16.5, 26],
     (b) =>
       b
-        .bumps(3, 5, 0.8)
-        .steps(4, 1.6, 0.26)
+        .bumps(3, 6.5, 0.8)
+        .steps(4, 1.6, 0.22)
         .flat(3)
         .seesaw(6)
         .flat(3)

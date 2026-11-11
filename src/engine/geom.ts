@@ -146,18 +146,40 @@ export function simplifyRing(pts: Pt[], eps: number): Pt[] {
   return [...a.slice(0, -1), ...b.slice(0, -1)];
 }
 
-/** Chaikin corner cutting on a closed ring. Used for drawing only. */
-export function smoothRing(pts: Pt[], rounds = 1): Pt[] {
+/**
+ * Chaikin corner cutting on a closed ring, for drawing only. Corners sharper
+ * than `keep` radians are left alone, so a square stays a square while a
+ * wobbly circle becomes smooth.
+ */
+export function smoothRing(pts: Pt[], rounds = 1, keep = 0.85): Pt[] {
   let p = pts;
+  let sharp = pts.map((b, i) => {
+    const a = pts[(i + pts.length - 1) % pts.length];
+    const c = pts[(i + 1) % pts.length];
+    const t = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(b.y - a.y, b.x - a.x);
+    return Math.abs(Math.atan2(Math.sin(t), Math.cos(t))) > keep;
+  });
   for (let r = 0; r < rounds; r++) {
     const out: Pt[] = [];
+    const flags: boolean[] = [];
     for (let i = 0; i < p.length; i++) {
       const a = p[i];
-      const b = p[(i + 1) % p.length];
-      out.push({ x: a.x * 0.75 + b.x * 0.25, y: a.y * 0.75 + b.y * 0.25 });
-      out.push({ x: a.x * 0.25 + b.x * 0.75, y: a.y * 0.25 + b.y * 0.75 });
+      const j = (i + 1) % p.length;
+      const b = p[j];
+      if (sharp[i]) {
+        out.push(a);
+        flags.push(true);
+      } else {
+        out.push({ x: a.x * 0.75 + b.x * 0.25, y: a.y * 0.75 + b.y * 0.25 });
+        flags.push(false);
+      }
+      if (!sharp[j]) {
+        out.push({ x: a.x * 0.25 + b.x * 0.75, y: a.y * 0.25 + b.y * 0.75 });
+        flags.push(false);
+      }
     }
     p = out;
+    sharp = flags;
   }
   return p;
 }

@@ -11,7 +11,8 @@ function drive(courseIndex: number, strokes: Stroke[], limit = 60) {
 }
 
 describe("every course can be finished by holding Go", () => {
-  for (const s of STARTERS) {
+  const small = ODDITIES.find((o) => o.id === "small-car")!;
+  for (const s of [...STARTERS, small]) {
     it(`${s.name} finishes all ten`, () => {
       const failed = COURSES.filter((_, i) => !drive(i, s.strokes).finished).map((c) => c.name);
       expect(failed).toEqual([]);
@@ -19,7 +20,7 @@ describe("every course can be finished by holding Go", () => {
   }
   it("square wheels are slow but get through most of them", () => {
     const times = COURSES.map((_, i) => drive(i, ODDITIES[0].strokes));
-    expect(times.filter((t) => t.finished).length).toBeGreaterThanOrEqual(7);
+    expect(times.filter((t) => t.finished).length).toBeGreaterThanOrEqual(8);
     const buggy = drive(0, STARTERS[0].strokes).finishT;
     expect(times[0].finishT).toBeGreaterThan(buggy * 1.5);
   });
@@ -34,7 +35,7 @@ describe("every course can be finished by holding Go", () => {
 
 describe("bad ideas still do something", () => {
   it("a tower, one wheel and a brick never blow up", () => {
-    for (const s of ODDITIES) {
+    for (const s of ODDITIES.filter((o) => o.id !== "small-car")) {
       const sim = drive(0, s.strokes, 12);
       const p = sim.lead!.getPosition();
       expect(Number.isFinite(p.x) && Number.isFinite(p.y)).toBe(true);

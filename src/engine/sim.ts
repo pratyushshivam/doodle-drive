@@ -2,7 +2,7 @@
 // stepped at a fixed rate. No DOM here, so the same code runs in the browser
 // and in the tests that check every course can be finished.
 
-import { type Body, Box, Chain, Circle, Polygon, RevoluteJoint, Vec2, World } from "planck";
+import { type Body, Box, Chain, Circle, Polygon, RevoluteJoint, Vec2, WheelJoint, World } from "planck";
 import { type Course, type Prop, groundAt } from "./courses";
 import type { Doodle, Part } from "./doodle";
 import type { Pt } from "./geom";
@@ -16,6 +16,8 @@ const PROP = 8;
 
 /** Top speed the wheels aim for, in metres per second. */
 const TOP_SPEED = 9.5;
+/** Stiffness of the sprung axles, in hertz. */
+const SPRING_HZ = 6;
 /** Motor strength, as a share of the machine's weight times the wheel radius. */
 const TORQUE = 0.8;
 
@@ -24,7 +26,7 @@ export interface SimPart {
   body: Body;
   /** The drawn outline in the body's own frame. */
   local: Pt[];
-  joint: RevoluteJoint | null;
+  joint: WheelJoint | null;
   /** True while a wheel touches the ground or a toy. */
   grounded: boolean;
   torque: number;
@@ -180,7 +182,7 @@ export class Sim {
           body.createFixture({
             shape: new Polygon(piece.map((p) => Vec2(p.x + off.x - origin.x, p.y + off.y - origin.y))),
             density: m.kind === "stick" ? 1.6 : 1,
-            friction: 0.45,
+            friction: 0.2,
             restitution: 0.12,
             filterCategoryBits: BODY,
             filterMaskBits: GROUND | BODY | PROP,
@@ -207,7 +209,7 @@ export class Sim {
       const origin = { x: w.center.x + off.x, y: w.center.y + off.y };
       const body = this.world.createBody({ type: "dynamic", position: Vec2(origin.x, origin.y), angularDamping: 0.1 });
       const fx = {
-        density: 1.3,
+        density: 2.2,
         friction: 1.6,
         restitution: 0.08,
         filterCategoryBits: WHEEL,
@@ -219,10 +221,18 @@ export class Sim {
           body.createFixture({ shape: new Polygon(piece.map((p) => Vec2(p.x - w.center.x, p.y - w.center.y))), ...fx });
         }
       }
-      let joint: RevoluteJoint | null = null;
+      let joint: WheelJoint | null = null;
       if (w.group >= 0) {
+        // A sprung axle: the wheel can travel a little up and down, which
+        // soaks up kerbs and gives the machine its wobble.
         joint = this.world.createJoint(
-          new RevoluteJoint({ enableMotor: false, maxMotorTorque: 0 }, groupBody[w.group], body, Vec2(origin.x, origin.y)),
+          new WheelJoint(
+            { enableMotor: false, maxMotorTorque: 0, frequencyHz: SPRING_HZ, dampingRatio: 0.75 },
+            groupBody[w.group],
+            body,
+            Vec2(origin.x, origin.y),
+            Vec2(0, 1),
+          ),
         );
       }
       const sp: SimPart = { part: w, body, local: toLocal(w.outline, off, origin), joint, grounded: false, torque: 0, speed: 0 };
@@ -266,15 +276,21 @@ export class Sim {
     const airborne = !this.parts.some((p) => p.grounded);
     // Also in the air: bodies resist tumbling, so most jumps land wheels down.
     for (const p of this.parts) {
-      if (p.part.kind !== "wheel") p.body.setAngularDamping(airborne ? 2.2 : 0.05);
+      if (p.part.kind !== "wheel") p.body.setAngularDamping(airborne ? 2.4 : 1.2);
     }
     for (const p of this.parts) {
       if (p.part.kind !== "wheel") continue;
       if (p.joint) {
         // A little traction control: the further the body rears up, the less
         // the motor pushes. A tall tower still topples. A car on a bump does not.
-        const a = Math.atan2(Math.sin(p.joint.getBodyA().getAngle()), Math.cos(p.joint.getBodyA().getAngle()));
-        const rear = Math.max(0, Math.min(0.8, (-a * drive - 0.3) / 0.6));
+        const host = p.joint.getBodyA();
+        const a = Math.atan2(Math.sin(host.getAngle()), Math.cos(host.getAngle()));
+        // Measured against the hill it is on, so climbing is not mistaken for rearing.
+        const hx = host.getPosition().x;
+        const g1 = groundAt(this.course, hx - 1.2);
+        const g2 = groundAt(this.course, hx + 1.2);
+        const hill = g1 !== null && g2 !== null ? Math.atan2(g2 - g1, 2.4) : 0;
+        const rear = Math.max(0, Math.min(1, (-(a - hill) * drive - 0.16) / 0.4));
         const ease = (1 - rear) * (airborne ? 0.2 : 1);
         p.joint.enableMotor(drive !== 0 || this.finished);
         p.joint.setMotorSpeed(drive * p.speed);
@@ -294,6 +310,14 @@ export class Sim {
     }
     this.world.step(STEP, 8, 3);
     this.t += STEP;
+    // A wedged shape can be squeezed out at silly speeds. Keep everything sane.
+    for (const p of this.parts) {
+      const v = p.body.getLinearVelocity();
+      const sp = Math.hypot(v.x, v.y);
+      if (sp > 26) p.body.setLinearVelocity(Vec2((v.x * 26) / sp, (v.y * 26) / sp));
+      const w = p.body.getAngularVelocity();
+      if (Math.abs(w) > 45) p.body.setAngularVelocity(Math.sign(w) * 45);
+    }
     const lead = this.lead;
     if (!lead) return;
     const pos = lead.getPosition();
