@@ -12,6 +12,7 @@
   <a href="#how-a-doodle-becomes-a-machine">How it works</a> ·
   <a href="#the-courses">The courses</a> ·
   <a href="#run-it">Run it</a> ·
+  <a href="https://www.pratyushshivam.com/projects/doodle-drive/">The full write-up</a> ·
   <a href="https://www.pratyushshivam.com/">pratyushshivam.com</a>
 </p>
 
